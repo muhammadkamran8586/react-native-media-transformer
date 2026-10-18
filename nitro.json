@@ -1,0 +1,23 @@
+{
+  "cxxNamespace": ["mediatransformer"],
+  "ios": {
+    "iosModuleName": "MediaTransformer"
+  },
+  "android": {
+    "androidNamespace": ["mediatransformer"],
+    "androidCxxLibName": "mediatransformer"
+  },
+  "autolinking": {
+    "MediaTransformer": {
+      "ios": {
+        "language": "swift",
+        "implementationClassName": "MediaTransformer"
+      },
+      "android": {
+        "language": "kotlin",
+        "implementationClassName": "MediaTransformer"
+      }
+    }
+  },
+  "ignorePaths": ["node_modules"]
+}
