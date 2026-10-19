@@ -12,9 +12,11 @@
     "build:web": "vite build"
   },
   "dependencies": {
+    "@react-native-camera-roll/camera-roll": "^7.10.2",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-native": "0.86.2",
+    "react-native-image-picker": "^4.0.0",
     "react-native-nitro-modules": "^0.37.1",
     "react-native-web": "~0.21.2"
   },
