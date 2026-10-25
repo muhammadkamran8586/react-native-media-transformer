@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   s.authors      = package["author"]
 
   s.platforms    = { :ios => min_ios_version_supported }
-  s.source       = { :git => "https://github.com/muhammadkamran8586/react-native-media-transformer.git", :tag => "#{s.version}" }
+  s.source       = { :git => "https://github.com/muhammadkamran8586/react-native-media-transformer.git", :tag => "v#{s.version}" }
 
   s.source_files = [
     "ios/**/*.{swift}",

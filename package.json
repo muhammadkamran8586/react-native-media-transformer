@@ -1,7 +1,7 @@
 {
   "name": "react-native-media-transformer",
   "version": "0.1.0",
-  "description": "Media transformer library ",
+  "description": "Native video compression, trimming, resizing, metadata and thumbnails for React Native on Android and iOS.",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
   "exports": {
@@ -13,6 +13,7 @@
     "./package.json": "./package.json"
   },
   "files": [
+    "CHANGELOG.md",
     "src",
     "lib",
     "android",
@@ -40,15 +41,25 @@
     "nitrogen": "nitrogen",
     "typecheck": "tsc",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
-    "test": "jest",
+    "test": "jest --watchman=false",
+    "test:ios": "bash scripts/test-ios.sh",
     "release": "release-it --only-version",
-    "web": "vite",
-    "build:web": "vite build"
+    "web": "yarn example web",
+    "build:web": "yarn example build:web",
+    "verify:package": "node scripts/verify-package.mjs"
   },
   "keywords": [
     "react-native",
     "ios",
-    "android"
+    "android",
+    "video",
+    "compression",
+    "trim",
+    "resize",
+    "thumbnail",
+    "hevc",
+    "h264",
+    "nitro-modules"
   ],
   "repository": {
     "type": "git",
@@ -140,7 +151,7 @@
       "customExportConditions": [
         "require",
         "react-native",
-        "<%- project.sourceCondition -%>"
+        "react-native-media-transformer-source"
       ]
     },
     "modulePathIgnorePatterns": [

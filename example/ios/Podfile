@@ -30,5 +30,15 @@ target 'MediaTransformerExample' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+    # Older picker/gallery privacy bundles declare iOS 9; current Xcode
+    # requires their deployment target to match the app's supported minimum.
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |build_config|
+        minimum = build_config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
+        if minimum && minimum.to_f < min_ios_version_supported.to_f
+          build_config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = min_ios_version_supported
+        end
+      end
+    end
   end
 end

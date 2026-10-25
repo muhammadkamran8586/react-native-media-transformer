@@ -1,58 +1,69 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { compress, cancelCompress } from '../compress';
+import { createVideoCompressor } from '../api';
+import { resolveCompressOptions, validateInput } from '../options';
+import type { CompressOptions } from '../options';
 
+/** Owns an independent native session, including cancellation on unmount. */
 export const useVideoCompressor = () => {
-  const [progress, setProgress] = useState<number>(0);
-  const [isCompressing, setIsCompressing] = useState<boolean>(false);
+  const [progress, setProgress] = useState(0);
+  const [isCompressing, setIsCompressing] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-
-  const isCancelledRef = useRef<boolean>(false);
-
+  const [outputPath, setOutputPath] = useState<string | null>(null);
+  const [compressor] = useState(createVideoCompressor);
+  const lifecycle = useRef({ mounted: true, generation: 0 }).current;
   const cancel = useCallback(async () => {
-    isCancelledRef.current = true;
-    try {
-      await cancelCompress();
-    } catch {
-    } finally {
-      setIsCompressing(false);
-      setProgress(0);
-    }
-  }, []);
+    await compressor.cancel();
+  }, [compressor]);
 
-  const compressVideo = useCallback(async (inputUri: string, options: any) => {
-    isCancelledRef.current = false;
-    setIsCompressing(true);
-    setProgress(0);
-    setError(null);
-
-    try {
-      const result = await compress(inputUri, options, (p: number) => {
-        setProgress(p);
-      });
-      return result;
-    } catch (err) {
-      if (isCancelledRef.current) {
-        return null;
+  const compressVideo = useCallback(
+    async (inputUri: string, options: CompressOptions = {}) => {
+      validateInput(inputUri);
+      resolveCompressOptions(options);
+      const id = ++lifecycle.generation;
+      if (lifecycle.mounted) {
+        setIsCompressing(true);
+        setProgress(0);
+        setError(null);
+        setOutputPath(null);
       }
-      const e = err instanceof Error ? err : new Error(String(err));
-      setError(e);
-      throw e;
-    } finally {
+      try {
+        const path = await compressor.compress(inputUri, options, (p) => {
+          if (lifecycle.mounted && id === lifecycle.generation) setProgress(p);
+        });
+        if (lifecycle.mounted && id === lifecycle.generation)
+          setOutputPath(path);
+        return path;
+      } catch (err) {
+        const e = err instanceof Error ? err : new Error(String(err));
+        if (lifecycle.mounted && id === lifecycle.generation) setError(e);
+        throw e;
+      } finally {
+        if (lifecycle.mounted && id === lifecycle.generation)
+          setIsCompressing(false);
+      }
+    },
+    [compressor, lifecycle]
+  );
+
+  const reset = useCallback(async () => {
+    const id = ++lifecycle.generation;
+    await compressor.cancel();
+    if (lifecycle.mounted && id === lifecycle.generation) {
+      setProgress(0);
+      setError(null);
+      setOutputPath(null);
       setIsCompressing(false);
     }
-  }, []);
-
-  const reset = useCallback(() => {
-    setProgress(0);
-    setError(null);
-    setIsCompressing(false);
-  }, []);
+  }, [compressor, lifecycle]);
 
   useEffect(() => {
+    lifecycle.mounted = true;
     return () => {
-      cancelCompress().catch(() => {});
+      lifecycle.mounted = false;
+      ++lifecycle.generation;
+      compressor.cancel().catch(() => {});
     };
-  }, []);
+  }, [compressor, lifecycle]);
 
   return {
     compressVideo,
@@ -61,6 +72,7 @@ export const useVideoCompressor = () => {
     progress,
     progressPercent: Math.round(progress * 100),
     error,
+    outputPath,
     reset,
   };
 };

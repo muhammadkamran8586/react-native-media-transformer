@@ -57,6 +57,9 @@ jobs:
       - name: Build package
         run: yarn prepare
 
+      - name: Verify published files and consumer API
+        run: yarn verify:package
+
   build-android:
     runs-on: ubuntu-latest
 
@@ -134,6 +137,9 @@ jobs:
 
       - name: Setup
         uses: ./.github/actions/setup
+
+      - name: Run native AVFoundation regressions
+        run: yarn test:ios
 
       - name: Generate nitrogen code
         run: yarn nitrogen

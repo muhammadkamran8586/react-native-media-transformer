@@ -84,3 +84,8 @@ android/generated
 
 # React Native Nitro Modules
 nitrogen/
+
+# Example web preview
+example/dist/
+example/android/.kotlin/
+example/ios/*.xcworkspace/

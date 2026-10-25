@@ -9,3 +9,11 @@ if (typeof document !== 'undefined') {
     rootTag: document.getElementById('root'),
   });
 }
+
+// Available through the Hermes inspector for repeatable native bridge checks.
+if (__DEV__) {
+  global.runMediaTransformerChecks = (inputUri) =>
+    import('./src/nativeChecks').then(({ runNativeChecks }) =>
+      runNativeChecks(inputUri)
+    );
+}

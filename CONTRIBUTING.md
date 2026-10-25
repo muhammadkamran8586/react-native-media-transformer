@@ -1,155 +1,73 @@
 # Contributing
 
-Contributions are always welcome, no matter how large or small!
+Open an [issue](https://github.com/muhammadkamran8586/react-native-media-transformer/issues) to discuss API changes or report a reproducible bug. Include the library version, React Native version, device and OS, input format, options, and error message. Follow the [code of conduct](CODE_OF_CONDUCT.md).
 
-We want this community to be friendly and respectful to each other. Please follow it in all your interactions with the project. Before contributing, please read the [code of conduct](./CODE_OF_CONDUCT.md).
+## Setup
 
-## Development workflow
-
-This project is a monorepo managed using [Yarn workspaces](https://yarnpkg.com/features/workspaces). It contains the following packages:
-
-- The library package in the root directory.
-- An example app in the `example/` directory.
-
-To get started with the project, make sure you have the correct version of [Node.js](https://nodejs.org/) installed. See the [`.nvmrc`](./.nvmrc) file for the version used in this project.
-
-Run `yarn` in the root directory to install the required dependencies for each package:
+Use the Node.js version in [`.nvmrc`](.nvmrc) and Yarn 4.11.0. Run commands from the repository root unless noted otherwise. Native development requires the React Native Android toolchain or macOS with Xcode and CocoaPods.
 
 ```sh
-yarn
-```
-
-> Since the project relies on Yarn workspaces, you cannot use [`npm`](https://github.com/npm/cli) for development without manually migrating.
-
-This project uses Nitro Modules. If you're not familiar with how Nitro works, make sure to check the [Nitro Modules Docs](https://nitro.margelo.com/).
-
-You need to run [Nitrogen](https://nitro.margelo.com/docs/nitrogen) to generate the boilerplate code required for this project. The example app will not build without this step.
-
-Run **Nitrogen** in following cases:
-
-- When you make changes to any `*.nitro.ts` files.
-- When running the project for the first time (since the generated files are not committed to the repository).
-
-To invoke **Nitrogen**, use the following command:
-
-```sh
+yarn install
 yarn nitrogen
 ```
 
-The [example app](/example/) demonstrates usage of the library. You need to run it to test any changes you make.
+The root contains the library; `example/` is a Yarn workspace that uses its local source. Regenerate Nitro bindings after changing `src/MediaTransformer.nitro.ts`. Generated files are included in the npm package by `yarn prepare`.
 
-It is configured to use the local version of the library, so any changes you make to the library's source code will be reflected in the example app. Changes to the library's JavaScript code will be reflected in the example app without a rebuild, but native code changes will require a rebuild of the example app.
+## Example app
 
-If you want to use Android Studio or Xcode to edit the native code, you can open the `example/android` or `example/ios` directories respectively in those editors. To edit the Objective-C or Swift files, open `example/ios/MediaTransformerExample.xcworkspace` in Xcode and find the source files at `Pods > Development Pods > react-native-media-transformer`.
-
-To edit the Java or Kotlin files, open `example/android` in Android studio and find the source files at `react-native-media-transformer` under `Android`.
-
-You can use various commands from the root directory to work with the project.
-
-To start the packager:
+Start Metro in one terminal:
 
 ```sh
 yarn example start
 ```
 
-To run the example app on Android:
+Run Android in another:
 
 ```sh
 yarn example android
 ```
 
-To run the example app on iOS:
+For iOS, install pods before the first build:
 
 ```sh
+cd example/ios
+pod install
+cd ../..
 yarn example ios
 ```
 
-To confirm that the app is running with the new architecture, you can check the Metro logs for a message like this:
+JavaScript changes reload through Metro. Native changes require a rebuild. Use Android Studio with `example/android`, or Xcode with `example/ios/MediaTransformerExample.xcworkspace`.
 
-```sh
-Running "MediaTransformerExample" with {"fabric":true,"initialProps":{"concurrentRoot":true},"rootTag":1}
-```
+`yarn example web` previews the interface; video processing requires a native build. See the [example guide](example/README.md) for bridge checks.
 
-Note the `"fabric":true` and `"concurrentRoot":true` properties.
-
-To run the example app on Web:
-
-```sh
-yarn example web
-```
-
-Make sure your code passes TypeScript:
+## Checks
 
 ```sh
 yarn typecheck
-```
-
-To check for linting errors, run the following:
-
-```sh
 yarn lint
+yarn test --runInBand
+yarn prepare
+yarn verify:package
 ```
 
-To fix formatting errors, run the following:
+`verify:package` inspects the npm tarball for required native files and generated bindings, checks exclusions, and typechecks the public API in an isolated consumer. It does not build a consumer's native app.
+
+On macOS with Xcode, also run:
 
 ```sh
-yarn lint --fix
+yarn test:ios
 ```
 
-Remember to add tests for your change if possible. Run the unit tests by:
+This typechecks the implementation for an iOS 15.1 deployment target and runs AVFoundation conversions on macOS using Nitro's Promise implementation and a bridge shim. It covers codecs, audio, trimming, frame rates, orientation, thumbnails, progress, validation, overwrites, cancellation, and cleanup. Run the example on Android and iOS for changes that affect native behavior.
 
-```sh
-yarn test
-```
+## Pull requests
 
+Keep changes focused, update documentation for public behavior, and include relevant tests. Describe the change and the checks performed, including the device and OS for native testing.
 
-### Commit message convention
+Use conventional commit messages, such as `fix(android): preserve output on cancellation` or `docs: clarify cache lifetime`. Git hooks check the message format.
 
-We follow the [conventional commits specification](https://www.conventionalcommits.org/en) for our commit messages:
+## Releases
 
-- `fix`: bug fixes, e.g. fix crash due to deprecated method.
-- `feat`: new features, e.g. add new method to the module.
-- `refactor`: code refactor, e.g. migrate from class components to hooks.
-- `docs`: changes into documentation, e.g. add usage example for the module.
-- `test`: adding or updating tests, e.g. add integration tests using detox.
-- `chore`: tooling changes, e.g. change CI config.
+Before publishing, build a clean consumer app from the packed tarball on both platforms. Check physical devices across supported OS versions, picker permissions and gallery saving, long and variable-frame-rate recordings, orientation, audio synchronization, and codec-dependent inputs such as HEVC and HDR. Review output quality as well as successful completion.
 
-Our pre-commit hooks verify that your commit message matches this format when committing.
-
-
-### Publishing to npm
-
-We use [release-it](https://github.com/release-it/release-it) to make it easier to publish new versions. It handles common tasks like bumping version based on semver, creating tags and releases etc.
-
-To publish new versions, run the following:
-
-```sh
-yarn release
-```
-
-
-### Scripts
-
-The `package.json` file contains various scripts for common tasks:
-
-- `yarn`: setup project by installing dependencies.
-- `yarn typecheck`: type-check files with TypeScript.
-  - `yarn lint`: lint files with [ESLint](https://eslint.org/).
-    - `yarn test`: run unit tests with [Jest](https://jestjs.io/).
-  - `yarn example start`: start the Metro server for the example app.
-- `yarn example android`: run the example app on Android.
-- `yarn example ios`: run the example app on iOS.
-  - `yarn example web`: run the example app on Web.
-- `yarn example build:web`: build the example app for Web.
-  
-### Sending a pull request
-
-> **Working on your first pull request?** You can learn how from this _free_ series: [How to Contribute to an Open Source Project on GitHub](https://app.egghead.io/playlists/how-to-contribute-to-an-open-source-project-on-github).
-
-When you're sending a pull request:
-
-- Prefer small pull requests focused on one change.
-- Verify that linters and tests are passing.
-- Review the documentation to make sure it looks good.
-- Follow the pull request template when opening a pull request.
-- For pull requests that change the API or implementation, discuss with maintainers first by opening an issue.
+Update [CHANGELOG.md](CHANGELOG.md), run the checks above, then use `yarn release`. The release command creates the version commit, tag, npm publication, and GitHub release; it requires maintainer credentials.
