@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1
+
+- Point the package homepage to the published documentation on mkamran.dev.
+- Add documentation and npm links and an npm version badge to the README.
+- No runtime or native API changes.
+
 ## 0.1.0
 
 Initial version.

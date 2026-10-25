@@ -1,6 +1,10 @@
 # react-native-media-transformer
 
+[![npm version](https://img.shields.io/npm/v/react-native-media-transformer.svg)](https://www.npmjs.com/package/react-native-media-transformer)
+
 Native video compression and editing for React Native, powered by Android Media3 and iOS AVFoundation. Resize and trim videos, choose H.264 or HEVC, control audio, inspect metadata, and generate JPEG thumbnails without uploading media.
+
+[Documentation](https://mkamran.dev/react-native-media-transfer) · [npm package](https://www.npmjs.com/package/react-native-media-transformer)
 
 ## Installation
 
