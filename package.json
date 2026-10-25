@@ -70,7 +70,7 @@
   "bugs": {
     "url": "https://github.com/muhammadkamran8586/react-native-media-transformer/issues"
   },
-  "homepage": "https://mkamran.dev/react-native-media-transfer",
+  "homepage": "https://mkamran.dev/react-native-media-transformer",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
